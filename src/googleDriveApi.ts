@@ -23,29 +23,29 @@ async function getFileContent(auth: Auth.OAuth2Client, fileId: string): Promise<
     const drive = google.drive({ version: "v3", auth });
   
     const res = await drive.files.export(
-      {
+        {
         fileId: fileId,
         mimeType: "text/csv", // CSV形式のファイルを想定
-      },
-      { responseType: "stream" }
+        },
+        { responseType: "stream" }
     );
   
     return new Promise<string>((resolve, reject) => {
-      let data = "";
-      res.data.on("data", (chunk) => {
-        data += chunk.toString();
-      });
-  
-      res.data.on("end", () => {
-        console.log("ファイルの中身を取得しました");
-        resolve(data);
-      });
-  
-      res.data.on("error", (err) => {
-        console.error("データの取得に失敗しました", err);
-        reject(err);
-      });
-    });
+        const chunks: Buffer[] = [];
+        res.data.on("data", (chunk: Buffer) => {
+        chunks.push(chunk);
+        });
+
+        res.data.on("end", () => {
+            const buffer = Buffer.concat(chunks);
+            const content = buffer.toString("utf-8"); // UTF-8でデコード
+            resolve(content);
+            });
+        
+            res.data.on("error", (err: any) => {
+            reject(err);
+            });
+        });
   }
   
 
