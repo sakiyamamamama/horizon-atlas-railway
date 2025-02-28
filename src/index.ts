@@ -11,8 +11,8 @@ app.get("/", (req, res) => {
 app.get("/getDrivefile/:fileId", async(req, res) => {
   const fileId = req.params.fileId; 
   const auth = await authorize();
-  const fileContent = await getFileContent(auth,fileId)
-  res.json({content:fileContent})
+  const fileContent = JSON.parse(await getFileContent(auth,fileId))
+  res.json(fileContent)
 });
 
 app.listen(PORT, () => {

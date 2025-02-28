@@ -19,6 +19,25 @@ async function authorize(): Promise<Auth.OAuth2Client> {
     return oAuth2Client; 
 }
 
+function parseCSV(csv: string): Record<string, string>[] {
+    const lines = csv.split("\r\n").filter(line => line.trim() !== ""); // 空行を除去
+    const headers = lines[0].split(","); // 1行目をヘッダーとして取得
+    const result: Record<string, string>[] = [];
+  
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(",");
+      const obj: Record<string, string> = {};
+  
+      headers.forEach((header, index) => {
+        obj[header.trim()] = values[index] ? values[index].trim() : "";
+      });
+  
+      result.push(obj);
+    }
+  
+    return result;
+  }
+
 async function getFileContent(auth: Auth.OAuth2Client, fileId: string): Promise<string> {
     const drive = google.drive({ version: "v3", auth });
   
@@ -39,7 +58,7 @@ async function getFileContent(auth: Auth.OAuth2Client, fileId: string): Promise<
         res.data.on("end", () => {
             const buffer = Buffer.concat(chunks);
             const content = buffer.toString("utf-8"); // UTF-8でデコード
-            resolve(content);
+            resolve(JSON.stringify(parseCSV(content)).replace("\\S",""));
             });
         
             res.data.on("error", (err: any) => {
