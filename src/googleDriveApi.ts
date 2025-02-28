@@ -5,7 +5,7 @@ dotenv.config();
 async function authorize(): Promise<Auth.OAuth2Client> {
     const client_secret = process.env.google_client_secret;
     const client_id = process.env.google_client_id;
-    const redirect_url = process.env.redirect_url;
+    const redirect_url = process.env.local_url;
     const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_url);
 
     oAuth2Client.setCredentials({
