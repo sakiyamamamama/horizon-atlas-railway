@@ -58,7 +58,7 @@ async function getFileContent(auth: Auth.OAuth2Client, fileId: string): Promise<
         res.data.on("end", () => {
             const buffer = Buffer.concat(chunks);
             const content = buffer.toString("utf-8"); // UTF-8でデコード
-            resolve(JSON.stringify(parseCSV(content)).replace("\\S",""));
+            resolve(JSON.stringify(parseCSV(content)));
             });
         
             res.data.on("error", (err: any) => {
