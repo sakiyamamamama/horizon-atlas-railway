@@ -1,6 +1,7 @@
 import express from "express";
 import { authorize, getFileContent } from "./googleDriveApi";
 import * as cor from "cors";
+import { getRole } from "./DiscordApi";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,13 +30,12 @@ app.get("/getDrivefile/:fileId", async(req, res) => {
   res.json(fileContent)
 });
 
+app.get("/getDiscordRole",async(req,res)=>{
+  const roleData = await getRole();
+  res.json(JSON.parse(roleData));
+})
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-function cors(arg0: {
-  origin: string; // フロントエンドのURL
-}): any {
-  throw new Error("Function not implemented.");
-}
 

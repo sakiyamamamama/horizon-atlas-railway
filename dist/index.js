@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const googleDriveApi_1 = require("./googleDriveApi");
 const cor = __importStar(require("cors"));
+const DiscordApi_1 = require("./DiscordApi");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 const allowedOrigins = [process.env.FRONTEND_URL, process.env.local_url];
@@ -62,9 +63,10 @@ app.get("/getDrivefile/:fileId", async (req, res) => {
     const fileContent = JSON.parse(await (0, googleDriveApi_1.getFileContent)(auth, fileId));
     res.json(fileContent);
 });
+app.get("/getDiscordRole", async (req, res) => {
+    const roleData = await (0, DiscordApi_1.getRole)();
+    res.json(JSON.parse(roleData));
+});
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-function cors(arg0) {
-    throw new Error("Function not implemented.");
-}
