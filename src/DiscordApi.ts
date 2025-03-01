@@ -7,7 +7,8 @@ interface Role {
 }
 
 export async function getRole(){
-    const BOT_TOKEN = process.env.BOT_TOKEN;
+    const BOT_TOKEN = process.env.BOT_TOKEN!;
+    console.log(process.env.BOT_TOKEN)
     const guildId = '1022421169770594315';
     const guildInfoUrl = `https://discord.com/api/guilds/${guildId}/roles`;
 
