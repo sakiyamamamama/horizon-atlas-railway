@@ -66,6 +66,12 @@ async function getFileContent(auth: Auth.OAuth2Client, fileId: string): Promise<
             });
         });
   }
+
+async function getUserData(userName:string,nameColumn:string,fileContent:string){
+    const content = JSON.parse(fileContent);
+    const userRow = content.filter((item:any)=>item[nameColumn]===userName);
+    return userRow;
+}
   
 
-export { authorize, getFileContent };
+export { authorize, getFileContent,getUserData };

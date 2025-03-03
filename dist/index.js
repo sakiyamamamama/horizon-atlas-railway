@@ -63,6 +63,15 @@ app.get("/getDrivefile/:fileId", async (req, res) => {
     const fileContent = JSON.parse(await (0, googleDriveApi_1.getFileContent)(auth, fileId));
     res.json(fileContent);
 });
+app.get("/getDrivefile/:fileId/userName/:userName/userColumn/:nameColumn", async (req, res) => {
+    const fileId = req.params.fileId;
+    const auth = await (0, googleDriveApi_1.authorize)();
+    const fileContent = await (0, googleDriveApi_1.getFileContent)(auth, fileId);
+    const userName = req.params.userName;
+    const nameColumn = req.params.nameColumn;
+    const userData = await (0, googleDriveApi_1.getUserData)(userName, nameColumn, fileContent);
+    res.json(userData);
+});
 app.get("/getDiscordRole", async (req, res) => {
     const roleData = await (0, DiscordApi_1.getRole)();
     res.json(JSON.parse(roleData));

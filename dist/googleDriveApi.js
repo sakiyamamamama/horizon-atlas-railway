@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authorize = authorize;
 exports.getFileContent = getFileContent;
+exports.getUserData = getUserData;
 const googleapis_1 = require("googleapis");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -56,4 +57,9 @@ async function getFileContent(auth, fileId) {
             reject(err);
         });
     });
+}
+async function getUserData(userName, nameColumn, fileContent) {
+    const content = JSON.parse(fileContent);
+    const userRow = content.filter((item) => item[nameColumn] === userName);
+    return userRow;
 }
