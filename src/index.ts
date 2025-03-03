@@ -30,7 +30,7 @@ app.get("/getDrivefile/:fileId", async(req, res) => {
   res.json(fileContent)
 });
 
-app.get("/getDrivefile/:fileId/userName/:userName/userColumn/:nameColumn",async(req,res)=>{
+app.get("/getDrivefile/:fileId/userName/:nameColumn/:userName",async(req,res)=>{
   const fileId = req.params.fileId;
   const auth = await authorize();
   const fileContent = await getFileContent(auth,fileId);

@@ -63,7 +63,7 @@ app.get("/getDrivefile/:fileId", async (req, res) => {
     const fileContent = JSON.parse(await (0, googleDriveApi_1.getFileContent)(auth, fileId));
     res.json(fileContent);
 });
-app.get("/getDrivefile/:fileId/userName/:userName/userColumn/:nameColumn", async (req, res) => {
+app.get("/getDrivefile/:fileId/userName/:nameColumn/:userName", async (req, res) => {
     const fileId = req.params.fileId;
     const auth = await (0, googleDriveApi_1.authorize)();
     const fileContent = await (0, googleDriveApi_1.getFileContent)(auth, fileId);
