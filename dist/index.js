@@ -42,14 +42,14 @@ const cor = __importStar(require("cors"));
 const DiscordApi_1 = require("./DiscordApi");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
-const allowedOrigins = [process.env.FRONTEND_URL, process.env.local_url];
+const allowedOrigins = [process.env.FRONTEND_URL2, process.env.FRONTEND_URL, process.env.local_url];
 app.use(cor.default({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true); // 許可
         }
         else {
-            callback(new Error("Not allowed by CORS")); // 拒否
+            callback(new Error("Not allowed by CORS"));
         }
     },
     credentials: true

@@ -60,8 +60,6 @@ async function getFileContent(auth, fileId) {
 }
 async function getUserData(userName, nameColumn, fileContent) {
     const content = JSON.parse(fileContent);
-    console.log(content);
     const userRow = content.filter((item) => item[nameColumn] === userName);
-    console.log(userRow);
     return userRow;
 }
