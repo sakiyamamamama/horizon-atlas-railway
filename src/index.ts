@@ -6,7 +6,7 @@ import { getRole } from "./DiscordApi";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const allowedOrigins = [process.env.FRONTEND_URL, process.env.local_url,process.env.FRONTEND_URL2];
+const allowedOrigins = [process.env.FRONTEND_URL2, process.env.FRONTEND_URL, process.env.local_url];
 
 app.use(cor.default({
   origin: (origin, callback) => {
