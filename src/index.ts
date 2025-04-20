@@ -6,6 +6,8 @@ import { getRole, getUserProfile } from "./DiscordApi";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(express.json());
+
 const allowedOrigins = [process.env.FRONTEND_URL2, process.env.FRONTEND_URL, process.env.local_url];
 
 app.use(cor.default({
@@ -20,7 +22,7 @@ app.use(cor.default({
 }));
 
 app.get("/", (req, res) => {
-  res.send("Hello, Railway with TypeScript!");
+  res.send("Hello, Railway!");
 });
 
 app.get("/getDrivefile/:fileId", async(req, res) => {

@@ -42,6 +42,7 @@ const cor = __importStar(require("cors"));
 const DiscordApi_1 = require("./DiscordApi");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
+app.use(express_1.default.json());
 const allowedOrigins = [process.env.FRONTEND_URL2, process.env.FRONTEND_URL, process.env.local_url];
 app.use(cor.default({
     origin: (origin, callback) => {
@@ -55,7 +56,7 @@ app.use(cor.default({
     credentials: true
 }));
 app.get("/", (req, res) => {
-    res.send("Hello, Railway with TypeScript!");
+    res.send("Hello, Railway!");
 });
 app.get("/getDrivefile/:fileId", async (req, res) => {
     const fileId = req.params.fileId;
