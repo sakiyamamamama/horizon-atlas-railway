@@ -71,12 +71,12 @@ export async function getUserProfile(accessToken:string){
 
     // ① ユーザー情報取得
     const userRes = await fetch('https://discord.com/api/users/@me', { headers });
-    if (!userRes.ok) throw new Error('Invalid response from Discord (User)');
+    if (!userRes.ok) return JSON.stringify({"error":'Invalid response from Discord (User)'})
     const userData = await userRes.json();
 
     // ② ギルド所属チェック
     const guildsRes = await fetch('https://discord.com/api/users/@me/guilds', { headers });
-    if (!guildsRes.ok) throw new Error('Invalid response from Discord (Guilds)');
+    if (!guildsRes.ok) return JSON.stringify({"error":'Invalid response from Discord (Guilds)'});
     const guildsData:Guild[] = await guildsRes.json();
     const GUILD_ID = '1022421169770594315'
 
@@ -93,7 +93,7 @@ export async function getUserProfile(accessToken:string){
 
     // ③ メンバー詳細情報取得
     const memberRes = await fetch(`https://discord.com/api/users/@me/guilds/${GUILD_ID}/member`, { headers });
-    if (!memberRes.ok) throw new Error('Invalid response from Discord (Member Info)');
+    if (!memberRes.ok) return JSON.stringify({"error":'Invalid response from Discord (Member Info)'})
     const memberData = await memberRes.json();
 
     // ④ ロール情報取得
