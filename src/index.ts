@@ -45,8 +45,8 @@ app.get("/getDiscordRole",async(req,res)=>{
   res.json(JSON.parse(roleData));
 })
 
-app.get("/getUserProfile/:accessToken",async(req,res)=>{
-  const accessToken = req.params.accessToken;
+app.post("/getUserProfile",async(req,res)=>{
+  const { accessToken } = req.body;
   const userProfile = await getUserProfile(accessToken);
   res.json(JSON.parse(userProfile))
 })
