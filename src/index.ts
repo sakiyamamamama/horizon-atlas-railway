@@ -1,7 +1,7 @@
 import express from "express";
 import { authorize, getFileContent, getUserData } from "./googleDriveApi";
 import * as cor from "cors";
-import { getRole } from "./DiscordApi";
+import { getRole, getUserProfile } from "./DiscordApi";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,6 +43,12 @@ app.get("/getDrivefile/:fileId/userName/:nameColumn/:userName",async(req,res)=>{
 app.get("/getDiscordRole",async(req,res)=>{
   const roleData = await getRole();
   res.json(JSON.parse(roleData));
+})
+
+app.get("/getUserProfile/:accessToken",async(req,res)=>{
+  const accessToken = req.params.accessToken;
+  const userProfile = await getUserProfile(accessToken);
+  res.json(JSON.parse(userProfile))
 })
 
 app.listen(PORT, () => {

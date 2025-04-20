@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRole = getRole;
+exports.getUserProfile = getUserProfile;
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 async function getRole() {
@@ -39,3 +40,68 @@ async function getRole() {
     return JSON.stringify(data);
 }
 ;
+async function getUserProfile(accessToken) {
+    try {
+        const headers = {
+            Authorization: `Bearer ${accessToken}`
+        };
+        // ① ユーザー情報取得
+        const userRes = await fetch('https://discord.com/api/users/@me', { headers });
+        if (!userRes.ok)
+            throw new Error('Invalid response from Discord (User)');
+        const userData = await userRes.json();
+        // ② ギルド所属チェック
+        const guildsRes = await fetch('https://discord.com/api/users/@me/guilds', { headers });
+        if (!guildsRes.ok)
+            throw new Error('Invalid response from Discord (Guilds)');
+        const guildsData = await guildsRes.json();
+        const GUILD_ID = '1022421169770594315';
+        const isMember = guildsData.some(guild => guild.id === GUILD_ID);
+        if (!isMember) {
+            return JSON.stringify({
+                user_id: userData.id,
+                name: userData.username,
+                picture: `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`,
+                profile: false,
+                given_name: ""
+            });
+        }
+        // ③ メンバー詳細情報取得
+        const memberRes = await fetch(`https://discord.com/api/users/@me/guilds/${GUILD_ID}/member`, { headers });
+        if (!memberRes.ok)
+            throw new Error('Invalid response from Discord (Member Info)');
+        const memberData = await memberRes.json();
+        // ④ ロール情報取得
+        const roleres = await getRole();
+        const roleInfo = await JSON.parse(roleres);
+        // ⑤ ロールチェックして結果を返す
+        const roles = memberData.roles || [];
+        let given_name = '体験入部';
+        if (!roleInfo.develop || !roleInfo.basic) {
+            return JSON.stringify({
+                user_id: userData.id,
+                name: memberData.nick,
+                picture: `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`,
+                profile: true,
+                given_name
+            });
+        }
+        if (roles.includes(roleInfo.develop.id)) {
+            given_name = '発展班';
+        }
+        else if (roles.includes(roleInfo.basic.id)) {
+            given_name = '基礎班';
+        }
+        return JSON.stringify({
+            user_id: userData.id,
+            name: memberData.nick,
+            picture: `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`,
+            profile: true,
+            given_name
+        });
+    }
+    catch (err) {
+        console.error(err);
+        return JSON.stringify({ "error": err });
+    }
+}
