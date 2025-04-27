@@ -61,17 +61,29 @@ app.get("/", (req, res) => {
 app.get("/getDrivefile/:fileId", async (req, res) => {
     const fileId = req.params.fileId;
     const auth = await (0, googleDriveApi_1.authorize)();
-    const fileContent = JSON.parse(await (0, googleDriveApi_1.getFileContent)(auth, fileId));
-    res.json(fileContent);
+    const parsedData = await (0, googleDriveApi_1.getFileContent)(auth, fileId);
+    res.json(parsedData);
 });
-app.get("/getDrivefile/:fileId/userName/:nameColumn/:userName", async (req, res) => {
+app.get("/getDriveSheet/fileId/:fileId/sheetName/:sheetName", async (req, res) => {
     const fileId = req.params.fileId;
+    const sheetName = req.params.sheetName;
     const auth = await (0, googleDriveApi_1.authorize)();
-    const fileContent = await (0, googleDriveApi_1.getFileContent)(auth, fileId);
-    const userName = req.params.userName;
-    const nameColumn = req.params.nameColumn;
-    const userData = await (0, googleDriveApi_1.getUserData)(userName, nameColumn, fileContent);
-    res.json(userData);
+    const data = await (0, googleDriveApi_1.getSheet)(auth, fileId, sheetName);
+    res.json(data);
+});
+app.get("/getDriveSheet/getStudentNumber/name/:name", async (req, res) => {
+    const name = req.params.name;
+    const auth = await (0, googleDriveApi_1.authorize)();
+    const fileId = "1TBsqURXWNBDKShdhjxITi2d87udMhuXeAQ0j82G-eww";
+    const sheetName = "部員名簿";
+    const data = await (0, googleDriveApi_1.getSheet)(auth, fileId, sheetName);
+    const target = data?.find((item) => item["氏名"] === name);
+    if (target) {
+        res.json(target);
+    }
+    else {
+        res.json(null);
+    }
 });
 app.get("/getDiscordRole", async (req, res) => {
     const roleData = await (0, DiscordApi_1.getRole)();

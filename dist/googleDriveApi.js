@@ -5,7 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authorize = authorize;
 exports.getFileContent = getFileContent;
-exports.getUserData = getUserData;
+exports.getSheet = getSheet;
+exports.parseCSVtoJSON = parseCSVtoJSON;
 const googleapis_1 = require("googleapis");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -23,43 +24,68 @@ async function authorize() {
     });
     return oAuth2Client;
 }
-function parseCSV(csv) {
-    const lines = csv.split("\r\n").filter(line => line.trim() !== ""); // 空行を除去
-    const headers = lines[0].split(","); // 1行目をヘッダーとして取得
-    const result = [];
-    for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(",");
+function parseCSVtoJSON(csv) {
+    const lines = csv.split("\r\n").filter(line => line.trim() !== "");
+    const headers = lines[0].split(",");
+    const result = lines.slice(1).map(line => {
+        const values = splitCSVLine(line);
         const obj = {};
         headers.forEach((header, index) => {
-            obj[header.trim()] = values[index] ? values[index].trim() : "";
+            obj[header.trim()] = (values[index] || "").trim();
         });
-        result.push(obj);
+        return obj;
+    });
+    return result;
+}
+// CSVの各行を正しく分割する（カンマを含むフィールドやダブルクオート対応）
+function splitCSVLine(line) {
+    const result = [];
+    let current = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"' && (i === 0 || line[i - 1] !== '\\')) {
+            inQuotes = !inQuotes;
+        }
+        else if (char === ',' && !inQuotes) {
+            result.push(current);
+            current = "";
+        }
+        else {
+            current += char;
+        }
     }
+    result.push(current);
     return result;
 }
 async function getFileContent(auth, fileId) {
     const drive = googleapis_1.google.drive({ version: "v3", auth });
     const res = await drive.files.export({
         fileId: fileId,
-        mimeType: "text/csv", // CSV形式のファイルを想定
+        mimeType: "text/csv",
     }, { responseType: "stream" });
-    return new Promise((resolve, reject) => {
-        const chunks = [];
-        res.data.on("data", (chunk) => {
-            chunks.push(chunk);
-        });
-        res.data.on("end", () => {
-            const buffer = Buffer.concat(chunks);
-            const content = buffer.toString("utf-8"); // UTF-8でデコード
-            resolve(JSON.stringify(parseCSV(content)));
-        });
-        res.data.on("error", (err) => {
-            reject(err);
-        });
-    });
+    let csvData = "";
+    for await (const chunk of res.data) {
+        csvData += chunk.toString(); // ストリームのチャンクを文字列に変換してどんどん追加
+    }
+    const parsedData = parseCSVtoJSON(csvData);
+    return parsedData;
 }
-async function getUserData(userName, nameColumn, fileContent) {
-    const content = JSON.parse(fileContent);
-    const userRow = content.filter((item) => item[nameColumn] === userName);
-    return userRow;
+async function getSheet(auth, fileId, sheetName) {
+    const sheets = googleapis_1.google.sheets({ version: "v4", auth });
+    const res = await sheets.spreadsheets.values.get({
+        spreadsheetId: fileId,
+        range: sheetName,
+    });
+    if (res.data.values) {
+        const [header, ...rows] = res.data.values;
+        const parsed = rows.map(row => {
+            const obj = {};
+            header.forEach((key, index) => {
+                obj[key] = row[index] || "";
+            });
+            return obj;
+        });
+        return parsed;
+    }
 }

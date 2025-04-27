@@ -1,5 +1,6 @@
 import { google, Auth } from "googleapis";
 import dotenv from "dotenv";
+import { sheets } from "googleapis/build/src/apis/sheets";
 dotenv.config(); 
 
 async function authorize(): Promise<Auth.OAuth2Client> {
@@ -19,59 +20,81 @@ async function authorize(): Promise<Auth.OAuth2Client> {
     return oAuth2Client; 
 }
 
-function parseCSV(csv: string): Record<string, string>[] {
-    const lines = csv.split("\r\n").filter(line => line.trim() !== ""); // 空行を除去
-    const headers = lines[0].split(","); // 1行目をヘッダーとして取得
-    const result: Record<string, string>[] = [];
+function parseCSVtoJSON(csv: string) {
+  const lines = csv.split("\r\n").filter(line => line.trim() !== "");
+  const headers = lines[0].split(",");
   
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(",");
-      const obj: Record<string, string> = {};
+  const result = lines.slice(1).map(line => {
+    const values = splitCSVLine(line);
+    const obj: { [key: string]: string } = {};
+    headers.forEach((header, index) => {
+      obj[header.trim()] = (values[index] || "").trim();
+    });
+    return obj;
+  });
   
-      headers.forEach((header, index) => {
-        obj[header.trim()] = values[index] ? values[index].trim() : "";
-      });
-  
-      result.push(obj);
+  return result;
+}
+
+// CSVの各行を正しく分割する（カンマを含むフィールドやダブルクオート対応）
+function splitCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"' && (i === 0 || line[i-1] !== '\\')) {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current);
+      current = "";
+    } else {
+      current += char;
     }
-  
-    return result;
   }
+  result.push(current);
+  return result;
+}
 
-async function getFileContent(auth: Auth.OAuth2Client, fileId: string): Promise<string> {
-    const drive = google.drive({ version: "v3", auth });
-  
-    const res = await drive.files.export(
-        {
-        fileId: fileId,
-        mimeType: "text/csv", // CSV形式のファイルを想定
-        },
-        { responseType: "stream" }
-    );
-  
-    return new Promise<string>((resolve, reject) => {
-        const chunks: Buffer[] = [];
-        res.data.on("data", (chunk: Buffer) => {
-        chunks.push(chunk);
-        });
+async function getFileContent(auth: Auth.OAuth2Client, fileId: string) {
+  const drive = google.drive({ version: "v3", auth });
 
-        res.data.on("end", () => {
-            const buffer = Buffer.concat(chunks);
-            const content = buffer.toString("utf-8"); // UTF-8でデコード
-            resolve(JSON.stringify(parseCSV(content)));
-            });
-        
-            res.data.on("error", (err: any) => {
-            reject(err);
-            });
-        });
+  const res = await drive.files.export(
+      {
+      fileId: fileId,
+      mimeType: "text/csv", 
+      },
+      { responseType: "stream" }
+  );
+
+  let csvData = "";
+  for await (const chunk of res.data) {
+    csvData += chunk.toString(); // ストリームのチャンクを文字列に変換してどんどん追加
   }
+  const parsedData = parseCSVtoJSON(csvData)
 
-async function getUserData(userName:string,nameColumn:string,fileContent:string){
-    const content = JSON.parse(fileContent);
-    const userRow = content.filter((item:any)=>item[nameColumn]===userName);
-    return userRow;
+  return parsedData
+}
+
+async function getSheet(auth: Auth.OAuth2Client, fileId: string, sheetName:string) {
+  const sheets = google.sheets({version: "v4",auth})
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId:fileId,
+    range: sheetName,
+  })
+  if(res.data.values){
+    const [header, ...rows] = res.data.values
+    const parsed = rows.map(row => {
+      const obj: Record<string, string> = {};
+      header.forEach((key, index) => {
+        obj[key] = row[index] || "";
+      });
+      return obj;
+    });
+    return parsed
+  }
 }
   
 
-export { authorize, getFileContent,getUserData };
+export { authorize, getFileContent,getSheet,parseCSVtoJSON };
