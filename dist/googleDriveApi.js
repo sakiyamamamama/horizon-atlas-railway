@@ -88,4 +88,5 @@ async function getSheet(auth, fileId, sheetName) {
         });
         return parsed;
     }
+    return [];
 }

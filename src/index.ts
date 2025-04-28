@@ -2,6 +2,7 @@ import express from "express";
 import { authorize, getFileContent, getSheet, parseCSVtoJSON } from "./googleDriveApi";
 import * as cor from "cors";
 import { getRole, getUserProfile } from "./DiscordApi";
+import { getUserProgress } from "./lib/getUserProgress";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,6 +33,16 @@ app.get("/getDrivefile/:fileId", async(req, res) => {
   res.json(parsedData)
 });
 
+app.get("/getDriveSheet/fileId/:fileId/sheetName/:sheetName/studentNumber/:studentNumber",async(req,res)=>{
+  const studentNumber = req.params.studentNumber;
+  const fileId = req.params.fileId;
+  const sheetName = req.params.sheetName;
+  const auth = await authorize();
+  const data = await getSheet(auth,fileId,sheetName);
+  const target = data.find((item)=>item["学籍番号"]===studentNumber)
+  res.status(200).json(target)
+})
+
 app.get("/getDriveSheet/fileId/:fileId/sheetName/:sheetName",async(req,res)=>{
   const fileId = req.params.fileId;
   const sheetName = req.params.sheetName;
@@ -46,7 +57,7 @@ app.get("/getDriveSheet/getStudentNumber/name/:name",async(req,res)=>{
   const fileId = "1TBsqURXWNBDKShdhjxITi2d87udMhuXeAQ0j82G-eww"
   const sheetName = "部員名簿";
   const data = await getSheet(auth,fileId,sheetName)
-  const target = data?.find((item)=>item["氏名"] === name)
+  const target = data.find((item)=>item["氏名"] === name)
   if(target){
     res.json(target)
   }else{
@@ -68,4 +79,3 @@ app.post("/getUserProfile",async(req,res)=>{
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-

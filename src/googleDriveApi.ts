@@ -94,6 +94,7 @@ async function getSheet(auth: Auth.OAuth2Client, fileId: string, sheetName:strin
     });
     return parsed
   }
+  return [];
 }
   
 

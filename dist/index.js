@@ -64,6 +64,15 @@ app.get("/getDrivefile/:fileId", async (req, res) => {
     const parsedData = await (0, googleDriveApi_1.getFileContent)(auth, fileId);
     res.json(parsedData);
 });
+app.get("/getDriveSheet/fileId/:fileId/sheetName/:sheetName/studentNumber/:studentNumber", async (req, res) => {
+    const studentNumber = req.params.studentNumber;
+    const fileId = req.params.fileId;
+    const sheetName = req.params.sheetName;
+    const auth = await (0, googleDriveApi_1.authorize)();
+    const data = await (0, googleDriveApi_1.getSheet)(auth, fileId, sheetName);
+    const target = data.find((item) => item["学籍番号"] === studentNumber);
+    res.status(200).json(target);
+});
 app.get("/getDriveSheet/fileId/:fileId/sheetName/:sheetName", async (req, res) => {
     const fileId = req.params.fileId;
     const sheetName = req.params.sheetName;
@@ -77,7 +86,7 @@ app.get("/getDriveSheet/getStudentNumber/name/:name", async (req, res) => {
     const fileId = "1TBsqURXWNBDKShdhjxITi2d87udMhuXeAQ0j82G-eww";
     const sheetName = "部員名簿";
     const data = await (0, googleDriveApi_1.getSheet)(auth, fileId, sheetName);
-    const target = data?.find((item) => item["氏名"] === name);
+    const target = data.find((item) => item["氏名"] === name);
     if (target) {
         res.json(target);
     }
