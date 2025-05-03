@@ -16,6 +16,8 @@ async function getDiscordAccessToken(code:string,redirectUrl:string) {
     try {
         console.log("code",code)
         console.log("redirect",redirectUrl)
+        console.log("client_id",process.env.DISCORD_CLIENT_ID)
+        console.log("secret",process.env.DISCORD_CLIENT_SECRET)
         const params = new URLSearchParams();
         params.append("client_id", process.env.DISCORD_CLIENT_ID!);
         params.append("client_secret", process.env.DISCORD_CLIENT_SECRET!);
