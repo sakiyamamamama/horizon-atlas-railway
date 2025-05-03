@@ -11,20 +11,30 @@ const axios_1 = __importDefault(require("axios"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT);
-firebase_admin_1.default.initializeApp({
-    credential: firebase_admin_1.default.credential.cert(serviceAccount),
-});
-async function getDiscordAccessToken(code, redirectUrl) {
-    const params = new URLSearchParams();
-    params.append("client_id", process.env.DISCORD_CLIENT_ID);
-    params.append("client_secret", process.env.DISCORD_CLIENT_SECRET);
-    params.append("grant_type", "authorization_code");
-    params.append("code", code);
-    params.append("redirect_uri", redirectUrl);
-    const res = await axios_1.default.post("https://discord.com/api/oauth2/token", params, {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+if (!firebase_admin_1.default.apps.length) {
+    firebase_admin_1.default.initializeApp({
+        credential: firebase_admin_1.default.credential.cert(serviceAccount),
     });
-    return res.data;
+}
+async function getDiscordAccessToken(code, redirectUrl) {
+    try {
+        console.log("code", code);
+        console.log("redirect", redirectUrl);
+        const params = new URLSearchParams();
+        params.append("client_id", process.env.DISCORD_CLIENT_ID);
+        params.append("client_secret", process.env.DISCORD_CLIENT_SECRET);
+        params.append("grant_type", "authorization_code");
+        params.append("code", code);
+        params.append("redirect_uri", redirectUrl);
+        const res = await axios_1.default.post("https://discord.com/api/oauth2/token", params, {
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        });
+        return res.data;
+    }
+    catch (error) {
+        console.error("Error getting Discord access token:", error.response?.data || error.message);
+        throw error;
+    }
 }
 async function getDiscordUser(accessToken) {
     const res = await axios_1.default.get("https://discord.com/api/users/@me", {
@@ -34,8 +44,6 @@ async function getDiscordUser(accessToken) {
     return data;
 }
 async function createFirebaseToken(discordUser) {
-    console.log("serviceAccount", serviceAccount);
-    console.log("discordUser", discordUser);
     const uid = `discord:${discordUser.id}`;
     const additionalClaims = {
         discord_username: discordUser.username,

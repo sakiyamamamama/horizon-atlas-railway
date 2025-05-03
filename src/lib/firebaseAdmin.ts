@@ -6,23 +6,32 @@ dotenv.config()
 
 const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT!);
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-});
+if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+}
 
 async function getDiscordAccessToken(code:string,redirectUrl:string) {
-    const params = new URLSearchParams();
-    params.append("client_id", process.env.DISCORD_CLIENT_ID!);
-    params.append("client_secret", process.env.DISCORD_CLIENT_SECRET!);
-    params.append("grant_type", "authorization_code");
-    params.append("code", code);
-    params.append("redirect_uri", redirectUrl);
-  
-    const res = await axios.post("https://discord.com/api/oauth2/token", params, {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    });
-  
-    return res.data;
+    try {
+        console.log("code",code)
+        console.log("redirect",redirectUrl)
+        const params = new URLSearchParams();
+        params.append("client_id", process.env.DISCORD_CLIENT_ID!);
+        params.append("client_secret", process.env.DISCORD_CLIENT_SECRET!);
+        params.append("grant_type", "authorization_code");
+        params.append("code", code);
+        params.append("redirect_uri", redirectUrl);
+    
+        const res = await axios.post("https://discord.com/api/oauth2/token", params, {
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        });
+    
+        return res.data;
+      } catch (error: any) {
+        console.error("Error getting Discord access token:", error.response?.data || error.message);
+        throw error;
+      }
 }
 
 type DiscordUser = {
@@ -52,8 +61,6 @@ async function getDiscordUser(accessToken:string) {
 }
 
 async function createFirebaseToken(discordUser:DiscordUser) {
-    console.log("serviceAccount",serviceAccount)
-    console.log("discordUser",discordUser)
     const uid = `discord:${discordUser.id}`;
     const additionalClaims = {
       discord_username: discordUser.username,
