@@ -82,9 +82,12 @@ app.post("/auth/discord", async (req, res) => {
 
   try {
     const tokenData = await getDiscordAccessToken(code,redirectUrl);
-    const userData = await getDiscordUser(tokenData.access_token);
-    const firebaseToken = await createFirebaseToken(userData);
-    res.json(firebaseToken);
+    const firebaseToken = await createFirebaseToken(tokenData.access_token);
+    if(firebaseToken===undefined){
+      res.status(401).json({error:"プロフィールを取得できませんでした"})
+    }else{
+      res.json(firebaseToken);
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "認証エラー" });

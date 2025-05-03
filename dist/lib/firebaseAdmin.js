@@ -9,6 +9,7 @@ exports.createFirebaseToken = createFirebaseToken;
 const firebase_admin_1 = __importDefault(require("firebase-admin"));
 const axios_1 = __importDefault(require("axios"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const getDiscordProfile_1 = require("./getDiscordProfile");
 dotenv_1.default.config();
 const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT);
 if (!firebase_admin_1.default.apps.length) {
@@ -41,13 +42,12 @@ async function getDiscordUser(accessToken) {
     const data = res.data;
     return data;
 }
-async function createFirebaseToken(discordUser) {
-    const uid = `discord:${discordUser.id}`;
-    // const additionalClaims = {
-    //   discord_username: discordUser.username,
-    //   discord_avatar: discordUser.avatar,
-    // };
-    const photoUrl = `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`;
-    const firebaseToken = await firebase_admin_1.default.auth().createCustomToken(uid);
-    return { firebaseToken, username: discordUser.username, avatar: photoUrl };
+async function createFirebaseToken(accessToken) {
+    const profile = await (0, getDiscordProfile_1.getUserProfile)(accessToken);
+    if (typeof profile === "string") {
+    }
+    else {
+        const firebaseToken = await firebase_admin_1.default.auth().createCustomToken(profile.user_id);
+        return { firebaseToken, profile };
+    }
 }

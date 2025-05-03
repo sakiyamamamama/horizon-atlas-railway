@@ -1,6 +1,7 @@
 import admin from "firebase-admin"
 import axios from "axios"
 import dotenv from "dotenv"
+import { getUserProfile } from "./getDiscordProfile";
 
 dotenv.config()
 
@@ -58,15 +59,14 @@ async function getDiscordUser(accessToken:string) {
     return data;
 }
 
-async function createFirebaseToken(discordUser:DiscordUser) {
-    const uid = `discord:${discordUser.id}`;
-    // const additionalClaims = {
-    //   discord_username: discordUser.username,
-    //   discord_avatar: discordUser.avatar,
-    // };
-    const photoUrl = `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`
-    const firebaseToken = await admin.auth().createCustomToken(uid)
-    return {firebaseToken, username:discordUser.username,avatar:photoUrl}
+async function createFirebaseToken(accessToken:string) {
+    const profile = await getUserProfile(accessToken)
+    if(typeof profile==="string"){
+
+    }else{
+        const firebaseToken = await admin.auth().createCustomToken(profile.user_id)
+        return {firebaseToken,profile}
+    }
 }
 
 export {getDiscordAccessToken, getDiscordUser, createFirebaseToken}

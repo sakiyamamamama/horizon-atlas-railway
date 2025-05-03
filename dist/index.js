@@ -108,9 +108,13 @@ app.post("/auth/discord", async (req, res) => {
     const { code, redirectUrl } = req.body;
     try {
         const tokenData = await (0, firebaseAdmin_1.getDiscordAccessToken)(code, redirectUrl);
-        const userData = await (0, firebaseAdmin_1.getDiscordUser)(tokenData.access_token);
-        const firebaseToken = await (0, firebaseAdmin_1.createFirebaseToken)(userData);
-        res.json(firebaseToken);
+        const firebaseToken = await (0, firebaseAdmin_1.createFirebaseToken)(tokenData.access_token);
+        if (firebaseToken === undefined) {
+            res.status(401).json({ error: "プロフィールを取得できませんでした" });
+        }
+        else {
+            res.json(firebaseToken);
+        }
     }
     catch (err) {
         console.error(err);
