@@ -18,8 +18,6 @@ if (!firebase_admin_1.default.apps.length) {
 }
 async function getDiscordAccessToken(code, redirectUrl) {
     try {
-        console.log("code", code);
-        console.log("redirect", redirectUrl);
         const params = new URLSearchParams();
         params.append("client_id", process.env.DISCORD_CLIENT_ID);
         params.append("client_secret", process.env.DISCORD_CLIENT_SECRET);
@@ -49,5 +47,6 @@ async function createFirebaseToken(discordUser) {
         discord_username: discordUser.username,
         discord_avatar: discordUser.avatar,
     };
-    return await firebase_admin_1.default.auth().createCustomToken(uid, additionalClaims);
+    const firebaseToken = await firebase_admin_1.default.auth().createCustomToken(uid, additionalClaims);
+    return { firebaseToken, username: discordUser.username, avatar: discordUser.avatar };
 }

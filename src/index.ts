@@ -84,7 +84,7 @@ app.post("/auth/discord", async (req, res) => {
     const tokenData = await getDiscordAccessToken(code,redirectUrl);
     const userData = await getDiscordUser(tokenData.access_token);
     const firebaseToken = await createFirebaseToken(userData);
-    res.json({ firebaseToken });
+    res.json(firebaseToken);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "認証エラー" });

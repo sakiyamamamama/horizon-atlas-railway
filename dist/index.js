@@ -110,7 +110,7 @@ app.post("/auth/discord", async (req, res) => {
         const tokenData = await (0, firebaseAdmin_1.getDiscordAccessToken)(code, redirectUrl);
         const userData = await (0, firebaseAdmin_1.getDiscordUser)(tokenData.access_token);
         const firebaseToken = await (0, firebaseAdmin_1.createFirebaseToken)(userData);
-        res.json({ firebaseToken });
+        res.json(firebaseToken);
     }
     catch (err) {
         console.error(err);

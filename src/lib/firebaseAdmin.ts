@@ -14,10 +14,6 @@ if (!admin.apps.length) {
 
 async function getDiscordAccessToken(code:string,redirectUrl:string) {
     try {
-        console.log("code",code)
-        console.log("redirect",redirectUrl)
-        console.log("client_id",process.env.DISCORD_CLIENT_ID)
-        console.log("secret",process.env.DISCORD_CLIENT_SECRET)
         const params = new URLSearchParams();
         params.append("client_id", process.env.DISCORD_CLIENT_ID!);
         params.append("client_secret", process.env.DISCORD_CLIENT_SECRET!);
@@ -68,8 +64,8 @@ async function createFirebaseToken(discordUser:DiscordUser) {
       discord_username: discordUser.username,
       discord_avatar: discordUser.avatar,
     };
-  
-    return await admin.auth().createCustomToken(uid, additionalClaims);
+    const firebaseToken = await admin.auth().createCustomToken(uid, additionalClaims)
+    return {firebaseToken, username:discordUser.username,avatar:discordUser.avatar}
 }
 
 export {getDiscordAccessToken, getDiscordUser, createFirebaseToken}
