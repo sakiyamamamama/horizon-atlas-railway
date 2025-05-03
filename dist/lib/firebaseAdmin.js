@@ -34,6 +34,8 @@ async function getDiscordUser(accessToken) {
     return data;
 }
 async function createFirebaseToken(discordUser) {
+    console.log("serviceAccount", serviceAccount);
+    console.log("discordUser", discordUser);
     const uid = `discord:${discordUser.id}`;
     const additionalClaims = {
         discord_username: discordUser.username,
