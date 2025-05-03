@@ -3,6 +3,7 @@ import { authorize, getFileContent, getSheet, parseCSVtoJSON } from "./googleDri
 import * as cor from "cors";
 import { getRole, getUserProfile } from "./DiscordApi";
 import { getUserProgress } from "./lib/getUserProgress";
+import { createFirebaseToken, getDiscordAccessToken, getDiscordUser } from "./lib/firebaseAdmin";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -75,6 +76,20 @@ app.post("/getUserProfile",async(req,res)=>{
   const userProfile = await getUserProfile(accessToken);
   res.json(JSON.parse(userProfile))
 })
+
+app.post("/auth/discord", async (req, res) => {
+  const { code,redirectUrl } = req.body;
+
+  try {
+    const tokenData = await getDiscordAccessToken(code,redirectUrl);
+    const userData = await getDiscordUser(tokenData.access_token);
+    const firebaseToken = await createFirebaseToken(userData);
+    res.json({ firebaseToken });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "認証エラー" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

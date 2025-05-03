@@ -40,6 +40,7 @@ const express_1 = __importDefault(require("express"));
 const googleDriveApi_1 = require("./googleDriveApi");
 const cor = __importStar(require("cors"));
 const DiscordApi_1 = require("./DiscordApi");
+const firebaseAdmin_1 = require("./lib/firebaseAdmin");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 app.use(express_1.default.json());
@@ -102,6 +103,19 @@ app.post("/getUserProfile", async (req, res) => {
     const { accessToken } = req.body;
     const userProfile = await (0, DiscordApi_1.getUserProfile)(accessToken);
     res.json(JSON.parse(userProfile));
+});
+app.post("/auth/discord", async (req, res) => {
+    const { code, redirectUrl } = req.body;
+    try {
+        const tokenData = await (0, firebaseAdmin_1.getDiscordAccessToken)(code, redirectUrl);
+        const userData = await (0, firebaseAdmin_1.getDiscordUser)(tokenData.access_token);
+        const firebaseToken = await (0, firebaseAdmin_1.createFirebaseToken)(userData);
+        res.json({ firebaseToken });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "認証エラー" });
+    }
 });
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
