@@ -60,12 +60,13 @@ async function getDiscordUser(accessToken:string) {
 
 async function createFirebaseToken(discordUser:DiscordUser) {
     const uid = `discord:${discordUser.id}`;
-    const additionalClaims = {
-      discord_username: discordUser.username,
-      discord_avatar: discordUser.avatar,
-    };
-    const firebaseToken = await admin.auth().createCustomToken(uid, additionalClaims)
-    return {firebaseToken, username:discordUser.username,avatar:discordUser.avatar}
+    // const additionalClaims = {
+    //   discord_username: discordUser.username,
+    //   discord_avatar: discordUser.avatar,
+    // };
+    const photoUrl = `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`
+    const firebaseToken = await admin.auth().createCustomToken(uid)
+    return {firebaseToken, username:discordUser.username,avatar:photoUrl}
 }
 
 export {getDiscordAccessToken, getDiscordUser, createFirebaseToken}
