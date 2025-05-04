@@ -73,7 +73,12 @@ app.get("/getDriveSheet/fileId/:fileId/sheetName/:sheetName/studentNumber/:stude
     const auth = await (0, googleDriveApi_1.authorize)();
     const data = await (0, googleDriveApi_1.getSheet)(auth, fileId, sheetName);
     const target = data.find((item) => item["学籍番号"] === studentNumber);
-    res.status(200).json(target);
+    if (!target) {
+        res.status(200).json({});
+    }
+    else {
+        res.status(200).json(target);
+    }
 });
 app.get("/getDriveSheet/fileId/:fileId/sheetName/:sheetName", async (req, res) => {
     const fileId = req.params.fileId;
