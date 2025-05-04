@@ -1,9 +1,35 @@
 import dotenv from "dotenv";
+import admin from "firebase-admin"
+import { Timestamp } from "firebase/firestore";
 dotenv.config(); 
 
 interface Role {
   id: string;
   name: string;
+}
+
+interface RoleRes{
+    basic?: {
+      id: string;
+      name: string;
+    },
+    develop?: {
+      id: string;
+      name: string;
+    },
+    error?:string
+  }
+  
+  interface Guild{
+    id:string;
+  }
+  
+type Profile={
+    user_id: string;
+    name:string;
+    picture:string;
+    profile: boolean;
+    given_name?:string;
 }
 
 async function getRole(){
@@ -46,31 +72,7 @@ async function getRole(){
   return JSON.stringify(data)
 };
 
-interface RoleRes{
-  basic?: {
-    id: string;
-    name: string;
-  },
-  develop?: {
-    id: string;
-    name: string;
-  },
-  error?:string
-}
-
-interface Guild{
-  id:string;
-}
-
-type Profile={
-    user_id: string;
-    name:string;
-    picture:string;
-    profile: boolean;
-    given_name?:string;
-}
-
-export async function getUserProfile(accessToken:string):Promise<string | Profile>{
+export async function getUserProfile(accessToken:string,db:admin.firestore.Firestore):Promise<string | Profile>{
 
     const headers = {
       Authorization: `Bearer ${accessToken}`
@@ -103,6 +105,8 @@ export async function getUserProfile(accessToken:string):Promise<string | Profil
     if (!memberRes.ok) return JSON.stringify({"error":'Invalid response from Discord (Member Info)'})
     const memberData = await memberRes.json();
 
+    const name = memberData.nick.split("-")[0]
+
     // ④ ロール情報取得
     const roleres = await getRole();
     const roleInfo:RoleRes = await JSON.parse(roleres)
@@ -113,7 +117,7 @@ export async function getUserProfile(accessToken:string):Promise<string | Profil
     if(!roleInfo.develop || !roleInfo.basic){
       return {
         user_id: userData.id,
-        name: memberData.nick,
+        name: name,
         picture: `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`,
         profile: true,
         given_name
@@ -128,7 +132,7 @@ export async function getUserProfile(accessToken:string):Promise<string | Profil
 
     return {
       user_id: userData.id,
-      name: memberData.nick,
+      name: name,
       picture: `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`,
       profile: true,
       given_name

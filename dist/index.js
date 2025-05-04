@@ -41,6 +41,7 @@ const googleDriveApi_1 = require("./googleDriveApi");
 const cor = __importStar(require("cors"));
 const DiscordApi_1 = require("./DiscordApi");
 const firebaseAdmin_1 = require("./lib/firebaseAdmin");
+const getDiscordAccessToken_1 = require("./lib/getDiscordAccessToken");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 app.use(express_1.default.json());
@@ -107,7 +108,7 @@ app.post("/getUserProfile", async (req, res) => {
 app.post("/auth/discord", async (req, res) => {
     const { code, redirectUrl } = req.body;
     try {
-        const tokenData = await (0, firebaseAdmin_1.getDiscordAccessToken)(code, redirectUrl);
+        const tokenData = await (0, getDiscordAccessToken_1.getDiscordAccessToken)(code, redirectUrl);
         const firebaseToken = await (0, firebaseAdmin_1.createFirebaseToken)(tokenData.access_token);
         if (firebaseToken === undefined) {
             res.status(401).json({ error: "プロフィールを取得できませんでした" });

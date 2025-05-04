@@ -1,9 +1,9 @@
 import express from "express";
-import { authorize, getFileContent, getSheet, parseCSVtoJSON } from "./googleDriveApi";
+import { authorize, getFileContent, getSheet } from "./googleDriveApi";
 import * as cor from "cors";
 import { getRole, getUserProfile } from "./DiscordApi";
-import { getUserProgress } from "./lib/getUserProgress";
-import { createFirebaseToken, getDiscordAccessToken, getDiscordUser } from "./lib/firebaseAdmin";
+import { createFirebaseToken } from "./lib/firebaseAdmin";
+import { getDiscordAccessToken } from "./lib/getDiscordAccessToken";
 
 const app = express();
 const PORT = process.env.PORT || 3000;

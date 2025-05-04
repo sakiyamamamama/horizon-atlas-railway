@@ -1,5 +1,4 @@
 import admin from "firebase-admin"
-import axios from "axios"
 import dotenv from "dotenv"
 import { getUserProfile } from "./getDiscordProfile";
 
@@ -13,54 +12,10 @@ if (!admin.apps.length) {
     });
 }
 
-async function getDiscordAccessToken(code:string,redirectUrl:string) {
-    try {
-        const params = new URLSearchParams();
-        params.append("client_id", process.env.DISCORD_CLIENT_ID!);
-        params.append("client_secret", process.env.DISCORD_CLIENT_SECRET!);
-        params.append("grant_type", "authorization_code");
-        params.append("code", code);
-        params.append("redirect_uri", redirectUrl);
-    
-        const res = await axios.post("https://discord.com/api/oauth2/token", params, {
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        });
-    
-        return res.data;
-      } catch (error: any) {
-        console.error("Error getting Discord access token:", error.response?.data || error.message);
-        throw error;
-      }
-}
-
-type DiscordUser = {
-    id: string;              
-    username: string;          
-    discriminator: string;    
-    avatar: string | null;    
-    bot?: boolean;            
-    system?: boolean;         
-    mfa_enabled?: boolean;     
-    banner?: string | null;   
-    accent_color?: number | null; 
-    locale?: string;           
-    verified?: boolean;       
-    email?: string | null;     
-    flags?: number;            
-    premium_type?: number;     
-    public_flags?: number;    
-};
-
-async function getDiscordUser(accessToken:string) {
-    const res = await axios.get("https://discord.com/api/users/@me", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    const data:DiscordUser = res.data
-    return data;
-}
+const db = admin.firestore();
 
 async function createFirebaseToken(accessToken:string) {
-    const profile = await getUserProfile(accessToken)
+    const profile = await getUserProfile(accessToken,db)
     if(typeof profile==="string"){
 
     }else{
@@ -69,4 +24,4 @@ async function createFirebaseToken(accessToken:string) {
     }
 }
 
-export {getDiscordAccessToken, getDiscordUser, createFirebaseToken}
+export {createFirebaseToken}

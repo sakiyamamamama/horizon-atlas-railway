@@ -39,7 +39,7 @@ async function getRole() {
     return JSON.stringify(data);
 }
 ;
-async function getUserProfile(accessToken) {
+async function getUserProfile(accessToken, db) {
     const headers = {
         Authorization: `Bearer ${accessToken}`
     };
@@ -69,6 +69,7 @@ async function getUserProfile(accessToken) {
     if (!memberRes.ok)
         return JSON.stringify({ "error": 'Invalid response from Discord (Member Info)' });
     const memberData = await memberRes.json();
+    const name = memberData.nick.split("-")[0];
     // ④ ロール情報取得
     const roleres = await getRole();
     const roleInfo = await JSON.parse(roleres);
@@ -78,7 +79,7 @@ async function getUserProfile(accessToken) {
     if (!roleInfo.develop || !roleInfo.basic) {
         return {
             user_id: userData.id,
-            name: memberData.nick,
+            name: name,
             picture: `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`,
             profile: true,
             given_name
@@ -92,7 +93,7 @@ async function getUserProfile(accessToken) {
     }
     return {
         user_id: userData.id,
-        name: memberData.nick,
+        name: name,
         picture: `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`,
         profile: true,
         given_name
