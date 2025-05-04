@@ -74,7 +74,8 @@ app.get("/getDriveSheet/fileId/:fileId/sheetName/:sheetName/studentNumber/:stude
     const data = await (0, googleDriveApi_1.getSheet)(auth, fileId, sheetName);
     const target = data.find((item) => item["学籍番号"] === studentNumber);
     if (!target) {
-        res.status(200).json({});
+        const empData = Object.fromEntries(Object.keys(data[0]).map((key) => [key, ""]));
+        res.status(200).json(empData);
     }
     else {
         res.status(200).json(target);
