@@ -18,6 +18,7 @@ const db = firebase_admin_1.default.firestore();
 async function createFirebaseToken(accessToken) {
     const profile = await (0, getDiscordProfile_1.getUserProfile)(accessToken, db);
     if (typeof profile === "string") {
+        return profile;
     }
     else {
         const firebaseToken = await firebase_admin_1.default.auth().createCustomToken(profile.user_id);

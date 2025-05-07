@@ -13,9 +13,9 @@ export async function getDiscordAccessToken(code:string,redirectUrl:string) {
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
         });
     
-        return res.data;
+        return {data:res.data,error:null,message:"successfully"};
       } catch (error: any) {
         console.error("Error getting Discord access token:", error.response?.data || error.message);
-        throw error;
+        return {data:null,error,message:"Discord accessTokenの取得に失敗しました"}
       }
 }

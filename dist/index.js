@@ -113,19 +113,36 @@ app.post("/getUserProfile", async (req, res) => {
 });
 app.post("/auth/discord", async (req, res) => {
     const { code, redirectUrl } = req.body;
-    try {
-        const tokenData = await (0, getDiscordAccessToken_1.getDiscordAccessToken)(code, redirectUrl);
-        const firebaseToken = await (0, firebaseAdmin_1.createFirebaseToken)(tokenData.access_token);
-        if (firebaseToken === undefined) {
-            res.status(401).json({ error: "プロフィールを取得できませんでした" });
-        }
-        else {
-            res.json(firebaseToken);
-        }
+    if (!code) {
+        console.error("codeを取得できませんでした");
+        res.status(500).json({ error: "codeを取得できませんでした" });
     }
-    catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "認証エラー" });
+    if (!redirectUrl) {
+        console.error("redirect urlを取得できませんでした");
+        res.status(500).json({ error: "リダイレクトURLを取得できませんでした" });
+    }
+    if (code && redirectUrl) {
+        try {
+            const tokenData = await (0, getDiscordAccessToken_1.getDiscordAccessToken)(code, redirectUrl);
+            if (tokenData.error) {
+                console.error(tokenData.message);
+                res.status(500).json({ error: tokenData.message });
+            }
+            if (tokenData.data) {
+                const firebaseToken = await (0, firebaseAdmin_1.createFirebaseToken)(tokenData.data.access_token);
+                if (typeof firebaseToken === "string") {
+                    console.error(firebaseToken);
+                    res.status(500).json({ error: firebaseToken });
+                }
+                else {
+                    res.status(200).json(firebaseToken);
+                }
+            }
+        }
+        catch (err) {
+            console.error(err);
+            res.status(500).json({ error: "認証エラー" });
+        }
     }
 });
 app.listen(PORT, () => {

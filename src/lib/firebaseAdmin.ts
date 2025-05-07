@@ -17,7 +17,7 @@ const db = admin.firestore();
 async function createFirebaseToken(accessToken:string) {
     const profile = await getUserProfile(accessToken,db)
     if(typeof profile==="string"){
-
+        return profile
     }else{
         const firebaseToken = await admin.auth().createCustomToken(profile.user_id)
         return {firebaseToken,profile}

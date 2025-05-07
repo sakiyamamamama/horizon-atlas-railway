@@ -16,10 +16,10 @@ async function getDiscordAccessToken(code, redirectUrl) {
         const res = await axios_1.default.post("https://discord.com/api/oauth2/token", params, {
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         });
-        return res.data;
+        return { data: res.data, error: null, message: "successfully" };
     }
     catch (error) {
         console.error("Error getting Discord access token:", error.response?.data || error.message);
-        throw error;
+        return { data: null, error, message: "Discord accessTokenの取得に失敗しました" };
     }
 }
