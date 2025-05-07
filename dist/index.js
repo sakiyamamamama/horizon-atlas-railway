@@ -113,14 +113,6 @@ app.post("/getUserProfile", async (req, res) => {
 });
 app.post("/auth/discord", async (req, res) => {
     const { code, redirectUrl } = req.body;
-    if (!code) {
-        console.error("codeを取得できませんでした");
-        res.status(500).json({ error: "codeを取得できませんでした" });
-    }
-    if (!redirectUrl) {
-        console.error("redirect urlを取得できませんでした");
-        res.status(500).json({ error: "リダイレクトURLを取得できませんでした" });
-    }
     if (code && redirectUrl) {
         try {
             const tokenData = await (0, getDiscordAccessToken_1.getDiscordAccessToken)(code, redirectUrl);
@@ -142,6 +134,16 @@ app.post("/auth/discord", async (req, res) => {
         catch (err) {
             console.error(err);
             res.status(500).json({ error: "認証エラー" });
+        }
+    }
+    else {
+        if (!code) {
+            console.error("codeを取得できませんでした");
+            res.status(500).json({ error: "codeを取得できませんでした" });
+        }
+        else {
+            console.error("redirect urlを取得できませんでした");
+            res.status(500).json({ error: "リダイレクトURLを取得できませんでした" });
         }
     }
 });
